@@ -1,7 +1,6 @@
 package zogo
 
 import (
-	"errors"
 	"fmt"
 )
 
@@ -42,64 +41,3 @@ func (v *RuleValidator) Validate(data map[string]interface{}) error {
 
 	return nil
 }
-
-
-type StringValidator struct {
-	validators []func(value string) error
-}
-
-func NewStringValidator() *StringValidator {
-	return &StringValidator{}
-}
-
-func (v *StringValidator) Email() *StringValidator {
-	v.validators = append(v.validators, func(value string) error {
-		if !EmailRegex.MatchString(value) {
-			return errors.New("invalid email format")
-		}
-		return nil
-	})
-	return v
-}
-
-func (v *StringValidator) NonEmpty() *StringValidator {
-	v.validators = append(v.validators, func(value string) error {
-		if value == "" {
-			return errors.New("cannot be empty")
-		}
-		return nil
-	})
-	return v
-}
-
-func (v *StringValidator) Min(minLength int) *StringValidator {
-	v.validators = append(v.validators, func(value string) error {
-		if len(value) < minLength {
-			return fmt.Errorf("must have a minimum length of %d", minLength)
-		}
-		return nil
-	})
-	return v
-}
-
-func (v *StringValidator) Validate(value interface{}) error {
-	strValue, ok := value.(string)
-	if !ok {
-		return errors.New("must be a string")
-	}
-
-	for _, validator := range v.validators {
-		if err := validator(strValue); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-
-
-
-
-
-

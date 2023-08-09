@@ -6,20 +6,6 @@ import (
 	"regexp"
 )
 
-
-func MinLengthValidator(minLength int) FieldValidator {
-	return func(value interface{}) error {
-		strValue, ok := value.(string)
-		if !ok {
-			return errors.New("must be a string")
-		}
-		if len(strValue) < minLength {
-			return fmt.Errorf("must have a minimum length of %d", minLength)
-		}
-		return nil
-	}
-}
-
 func MinValueValidator(minValue int) FieldValidator {
 	return func(value interface{}) error {
 		num, ok := value.(int)
@@ -28,19 +14,6 @@ func MinValueValidator(minValue int) FieldValidator {
 		}
 		if num < minValue {
 			return fmt.Errorf("must be greater than or equal to %d", minValue)
-		}
-		return nil
-	}
-}
-
-func MaxLengthValidator(maxLength int) FieldValidator {
-	return func(value interface{}) error {
-		strValue, ok := value.(string)
-		if !ok {
-			return errors.New("must be a string")
-		}
-		if len(strValue) > maxLength {
-			return fmt.Errorf("must have a maximum length of %d", maxLength)
 		}
 		return nil
 	}
@@ -137,6 +110,50 @@ func NumberSchema(value interface{}) error {
 
 
 
-func StringSchemas() *StringValidator {
-	return NewStringValidator()
+
+
+type StringValidator struct {
+	validators []func(value string) error
 }
+
+func NewStringValidator() *StringValidator {
+	return &StringValidator{}
+}
+
+func (v *StringValidator) Email() *StringValidator {
+	v.validators = append(v.validators, func(value string) error {
+		if !EmailRegex.MatchString(value) {
+			return errors.New("invalid email format")
+		}
+		return nil
+	})
+	return v
+}
+
+func (v *StringValidator) NonEmpty() *StringValidator {
+	v.validators = append(v.validators, func(value string) error {
+		if value == "" {
+			return errors.New("cannot be empty")
+		}
+		return nil
+	})
+	return v
+}
+
+func (v *StringValidator) Validate(value interface{}) error {
+	strValue, ok := value.(string)
+	if !ok {
+		return errors.New("must be a string")
+	}
+
+	for _, validator := range v.validators {
+		if err := validator(strValue); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+
+

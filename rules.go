@@ -92,18 +92,18 @@ func EmailSchema(value interface{}) error {
 }
 
 
-func BooleanSchema(value interface{}) error {
-	if value == nil {
-		return nil // Field is undefined or null
-	}
+// func BooleanSchema(value interface{}) error {
+// 	if value == nil {
+// 		return nil // Field is undefined or null
+// 	}
 
-	_, ok := value.(bool)
-	if !ok {
-		return fmt.Errorf("must be a boolean or nil")
-	}
+// 	_, ok := value.(bool)
+// 	if !ok {
+// 		return fmt.Errorf("must be a boolean or nil")
+// 	}
 
-	return nil
-}
+// 	return nil
+// }
 
 
 // StringSchema is a field validation function for string values.
@@ -198,4 +198,42 @@ func RequiredFieldValidator(fieldName string, fieldValidator FieldValidator) Fie
 		}
 		return nil
 	}
+}
+
+
+func BooleanSchema(value interface{}) error {
+	if value == nil {
+		return nil // Field is undefined or null
+	}
+
+	_, ok := value.(bool)
+	if !ok {
+		return fmt.Errorf("must be a boolean or nil")
+	}
+
+	return nil
+}
+
+
+
+func RequiredString(value interface{}) error {
+	str, ok := value.(string)
+	if !ok {
+		return errors.New("must be a string")
+	}
+	if str == "" {
+		return errors.New("is required and cannot be empty")
+	}
+	return nil
+}
+
+func RequiredNumber(value interface{}) error {
+	num, ok := value.(float64)
+	if !ok {
+		return errors.New("must be a number")
+	}
+	if num == 0 {
+		return errors.New("is required and cannot be zero")
+	}
+	return nil
 }

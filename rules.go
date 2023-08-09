@@ -134,3 +134,9 @@ func NumberSchema(value interface{}) error {
 
 	return nil
 }
+
+
+
+func StringSchemas() *StringValidator {
+	return NewStringValidator()
+}

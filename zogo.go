@@ -1,7 +1,6 @@
 package zogo
 
 import (
-	"errors"
 	"fmt"
 )
 
@@ -44,24 +43,42 @@ func (v *RuleValidator) Validate(data map[string]interface{}) error {
 }
 
 
-func NewObjectSchema(fields map[string]FieldValidator) FieldValidator {
+// func NewObjectSchema(fields map[string]FieldValidator) FieldValidator {
+// 	return func(value interface{}) error {
+// 		data, ok := value.(map[string]interface{})
+// 		if !ok {
+// 			return errors.New("must be an object")
+// 		}
+
+// 		for fieldName, validator := range fields {
+// 			fieldValue, exists := data[fieldName]
+// 			if !exists {
+// 				return fmt.Errorf("field '%s' not found in object", fieldName)
+// 			}
+
+// 			if err := validator(fieldValue); err != nil {
+// 				return fmt.Errorf("field '%s': %v", fieldName, err)
+// 			}
+// 		}
+
+// 		return nil
+// 	}
+// }
+
+
+func NewObjectSchema(validators map[string]FieldValidator) FieldValidator {
 	return func(value interface{}) error {
-		data, ok := value.(map[string]interface{})
-		if !ok {
-			return errors.New("must be an object")
-		}
-
-		for fieldName, validator := range fields {
-			fieldValue, exists := data[fieldName]
-			if !exists {
-				return fmt.Errorf("field '%s' not found in object", fieldName)
-			}
-
-			if err := validator(fieldValue); err != nil {
-				return fmt.Errorf("field '%s': %v", fieldName, err)
+		if data, ok := value.(map[string]interface{}); ok {
+			for fieldName, validator := range validators {
+				fieldValue, exists := data[fieldName]
+				if !exists {
+					return fmt.Errorf("field '%s' not found", fieldName)
+				}
+				if err := validator(fieldValue); err != nil {
+					return err
+				}
 			}
 		}
-
 		return nil
 	}
 }

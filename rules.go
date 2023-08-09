@@ -157,24 +157,24 @@ func EmailMinMaxLengthValidator(min, max int) FieldValidator {
 }
 
 
-func NestedFieldValidator() FieldValidator {
-	return CombineValidators(
-		NewObjectSchema(map[string]FieldValidator{
-			"here": StringSchema,
-		}),
-	)
-}
+// func NestedFieldValidator() FieldValidator {
+// 	return CombineValidators(
+// 		NewObjectSchema(map[string]FieldValidator{
+// 			"here": StringSchema,
+// 		}),
+// 	)
+// }
 
 
-func NestedObjectValidator() FieldValidator {
-	return CombineValidators(
-		NewObjectSchema(map[string]FieldValidator{
-			"somewhere": NewObjectSchema(map[string]FieldValidator{
-				"here": StringSchema,
-			}),
-		}),
-	)
-}
+// func NestedObjectValidator() FieldValidator {
+// 	return CombineValidators(
+// 		NewObjectSchema(map[string]FieldValidator{
+// 			"somewhere": NewObjectSchema(map[string]FieldValidator{
+// 				"here": StringSchema,
+// 			}),
+// 		}),
+// 	)
+// }
 
 
 func SecondLevelFieldValidator(fieldName string, fieldValidator FieldValidator) FieldValidator {
@@ -237,3 +237,32 @@ func RequiredNumber(value interface{}) error {
 	}
 	return nil
 }
+
+
+
+
+
+func NestedFieldValidator(fieldName string, fieldValidator FieldValidator) FieldValidator {
+	return func(value interface{}) error {
+		if data, ok := value.(map[string]interface{}); ok {
+			if fieldValue, exists := data[fieldName]; exists {
+				return fieldValidator(fieldValue)
+			}
+		}
+		return nil
+	}
+}
+
+func NestedObjectValidator(fieldName string, objectValidator FieldValidator) FieldValidator {
+	return func(value interface{}) error {
+		if data, ok := value.(map[string]interface{}); ok {
+			if fieldValue, exists := data[fieldName]; exists {
+				return objectValidator(fieldValue)
+			}
+			return fmt.Errorf("field '%s' not found", fieldName)
+		}
+		return nil
+	}
+}
+
+

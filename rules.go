@@ -187,3 +187,15 @@ func SecondLevelFieldValidator(fieldName string, fieldValidator FieldValidator) 
 		return nil
 	}
 }
+
+func RequiredFieldValidator(fieldName string, fieldValidator FieldValidator) FieldValidator {
+	return func(value interface{}) error {
+		if data, ok := value.(map[string]interface{}); ok {
+			if fieldValue, exists := data[fieldName]; exists {
+				return fieldValidator(fieldValue)
+			}
+			return fmt.Errorf("required field '%s' not found", fieldName)
+		}
+		return nil
+	}
+}
